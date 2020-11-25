@@ -2,8 +2,8 @@
 Deep Grewal - November 25, 2020
 
 ___
- ## What is Btrfs?
-Btrfs (b-tree filesystem) is commonly pronounced as "Better F-S", "Butter F-S", and "B-tree F-S".  Btrfs is a filesystem that was designed at Oracle in 2007 and has since been used within the Linux community.  By 2012, Oracle Linux and SUSE Linux Enterprise had adopted Btrfs as a production-viable, supported, file system.  In November of 2013, the filesystem was considered to be stable by the Linux community and was officially incorporated into the Linux kernel.  SUSE Linux Enterprise Server 12 was the first distribution of Linux to make Btrfs the default filesystem in 2015.  Fedora 33 has been the most recent distribution to do the same in 2020.  As time progresses, perhaps more distributions will do the same and adopt Btrfs as a default as well.
+## What is Btrfs?
+Btrfs (b-tree filesystem) is commonly pronounced as "Better F-S", "Butter F-S", and "B-tree F-S".  Btrfs is a filesystem that was designed at Oracle in 2007 and has since been in use throughout the Linux community.  By 2012, Oracle Linux and SUSE Linux Enterprise had adopted Btrfs as a production-viable and supported file system.  In November of 2013, the filesystem was considered to be stable by the Linux community and was officially incorporated into the Linux kernel.  SUSE Linux Enterprise Server 12 was the first distribution of Linux to make Btrfs the default filesystem in 2015.  Fedora 33 has been the most recent distribution to do the same in 2020.  As time progresses, perhaps more distributions will do the same and adopt Btrfs as a default as well.
 
 ### Under the Hood
 Now that we have some history established, let's have a peek at the technical underpinnings. Btrfs uses the copy-on-write (COW) methodology of writing information to disks.  In addition to COW, Btrfs takes advantage of pooling, snapshots, and checksums. It is also capable of enabling RAID across multiple devices.  The remainder of this document will focus on subvolumes and snapshots.
@@ -197,7 +197,7 @@ note1.txt  note2.txt  note3.txt
 ### Creating a Snapshot
 Everything is now in place to create a snapshot.  We now have: a Btrfs file system mounted, a subvolume created, and "important" data worthy of a snapshot.  
 
-Let's create snapshot the subvolume `/mnt/data/documents` into the snapshot location `/mnt/data/documents/snapshots`.  If we wanted to make a read-only snapshot, we could provide the `-r` parameter to the `btrfs subvolume snapshots` command.  In this example, we will not make the snapshot read-only.
+Let's create a snapshot for the subvolume `/mnt/data/documents` into the snapshot location `/mnt/data/documents/snapshots`.  If we wanted to make a read-only snapshot, we could provide the `-r` parameter to the `btrfs subvolume snapshots` command.  In this example, we will not make the snapshot read-only.
 
 ```
 deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume snapshot /mnt/data/documents /mnt/data/documents/snapshots
@@ -205,7 +205,7 @@ Create a snapshot of '/mnt/data/documents' in '/mnt/data/documents/snapshots'
 ```
 
 #### Verifying the Creation of a Snapshot (Subvolume)
-If you haven't yet noticed a pattern, by this point you should note that some of the `btrfs` commands don't output too much fanfare when things are successfully created.  I suppose its fodder for a good written tutorial.
+If you haven't yet noticed a pattern, by this point, you should note that some of the `btrfs` commands don't output too much fanfare when things are successfully created.  I suppose its fodder for a good written tutorial.
 
 Let's verify the creation of the snapshot using a basic `ls` command.  The `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshots` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents` source subvolume.
 
@@ -268,7 +268,7 @@ documents/snapshots
         Snapshot(s):
 ```
 
-For good measure, let's run the `btrfs subvolume list` command against the source and snapshot subvolumes to determine the same information.
+As a belt-and-suspenders check, let's run the `btrfs subvolume list` command against the source and snapshot subvolumes to determine the same information.
 
 ```
 deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume list /mnt/data/documents
@@ -281,7 +281,7 @@ ID 258 gen 13 top level 257 path documents/snapshots
 ```
 
 ### Recovering a Snapshot
-Now that we have created a snapshot, what can we do with it?  The snapshot is just another subvolume that contains the data of the source subvolume.  Both appear as directories.  Therefore, you could just copy files from the snapshot into the source subvolume as a primitive way of restoring.  That's just like backing up to a different location using `cp` or `rsync` and recovering the copies of the desired files and directories.  But where's the fun in that?  
+Now that we have created a snapshot, what can we do with it?  The snapshot is just another subvolume that contains the data of the source subvolume.  Both appear as directories.  Therefore, you could just copy files from the snapshot into the source subvolume as a primitive way of restoring.  That's just like backing up to a different location using `cp` or `rsync` and recovering the copies of the desired files and directories.  Where's the fun in that?  
 
 The `btrfs subvolume set-default` command is a more eloquent way of shifting a mount-point to a different subvolume. 
 
@@ -394,6 +394,8 @@ In our example, we will send the read-only snapshot created in the previous step
 deep@ubuntu-vm:~$ sudo btrfs send /mnt/data/documents/snapshots-ro/ | sudo btrfs receive /mnt/restore/
 ```
 
+## Summary
+Btrfs is a powerful and streamlined implementation within Linux.  
 ___
 ## Additional Commands
 Although not covered in this tutorial, here are some additional commands that can be useful when using the Btrfs file system.
