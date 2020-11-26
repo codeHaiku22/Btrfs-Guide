@@ -122,6 +122,12 @@ deep@ubuntu-vm:~$ sudo btrfs subvolume show /mnt/data
         Snapshot(s):
 ```
 
+#### Checking In
+So far, we have created the root-level subvolume (5) which is mounted at `/mnt/data`.
+
+Subvolume Id | Parent Subvolume Id | Name | Path
+-------------|---------------------|------|-----
+5 | 0 | <FS_TREE> | /mnt/data
 <br/>
 
 >***Note:** The default subvolume Id given to the root-level (highest-level) subvolume is 5.  Although a subvolume was not explicitly created, the act of mounting a Btrfs device created the root-level subvolume.*
@@ -194,8 +200,17 @@ notes:
 note1.txt  note2.txt  note3.txt
 ```
 
+#### Checking In
+We now have our first explicitly created subvolume (257) with a path of `/mnt/data/documents`.
+
+Subvolume Id | Parent Subvolume Id | Name | Path
+-------------|---------------------|------|-----
+5 | 0 | <FS_TREE> | /mnt/data
+257 | 5 | documents | /mnt/data/documents
+<br/>
+
 ### Creating a Snapshot
-Everything is now in place to create a snapshot.  We now have: a Btrfs file system mounted, a subvolume created, and "important" data worthy of a snapshot.  
+Everything is now in place to create a snapshot.  We now have: a Btrfs filesystem mounted, a subvolume created, and "important" data worthy of a snapshot.  
 
 Let's create a snapshot for the subvolume `/mnt/data/documents` into the snapshot location `/mnt/data/documents/snapshots`.  If we wanted to make a read-only snapshot, we could provide the `-r` parameter to the `btrfs subvolume snapshots` command.  In this example, we will not make the snapshot read-only.
 
@@ -205,7 +220,7 @@ Create a snapshot of '/mnt/data/documents' in '/mnt/data/documents/snapshots'
 ```
 
 #### Verifying the Creation of a Snapshot (Subvolume)
-If you haven't yet noticed a pattern, by this point, you should note that some of the `btrfs` commands don't output too much fanfare when things are successfully created.  I suppose its fodder for a good written tutorial.
+If you haven't yet noticed a pattern, by this point, you should note that some of the `btrfs` commands don't output too much fanfare when things are successfully created.  I suppose it's fodder for a good written tutorial.
 
 Let's verify the creation of the snapshot using a basic `ls` command.  The `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshots` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents` source subvolume.
 
@@ -279,6 +294,16 @@ deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume list /mnt/data/document
 ID 257 gen 14 top level 5 path documents
 ID 258 gen 13 top level 257 path documents/snapshots
 ```
+
+#### Checking In
+The snapshot is a subvolume (258) with a path of `/mnt/data/documents/snapshots`.
+
+Subvolume Id | Parent Subvolume Id | Name | Path
+-------------|---------------------|------|-----
+5 | 0 | <FS_TREE> | /mnt/data
+257 | 5 | documents | /mnt/data/documents
+258 | 257 | snapshots | /mnt/data/documents/snapshots
+<br/>
 
 ### Recovering a Snapshot
 Now that we have created a snapshot, what can we do with it?  The snapshot is just another subvolume that contains the data of the source subvolume.  Both appear as directories.  Therefore, you could just copy files from the snapshot into the source subvolume as a primitive way of restoring.  That's just like backing up to a different location using `cp` or `rsync` and recovering the copies of the desired files and directories.  Where's the fun in that?  
@@ -393,14 +418,14 @@ In our example, we will send the read-only snapshot created in the previous step
 ```
 deep@ubuntu-vm:~$ sudo btrfs send /mnt/data/documents/snapshots-ro/ | sudo btrfs receive /mnt/restore/
 ```
-
-## Summary
-Btrfs is a powerful and streamlined implementation within Linux.  
 ___
-## Additional Commands
-Although not covered in this tutorial, here are some additional commands that can be useful when using the Btrfs file system.
+## Summary
+Btrfs is a powerful and streamlined implementation within Linux which seeks to make data preservation and recovery simple and efficient.  This guide covers some of the basic aspects of Btrfs.  There is so much more that can be done with this filesystem and its variety of commands.  Add in some scripting (BASH, Python, Perl, etc.) and you have everything needed to create powerful Btrfs solutions that can accomplish some very heavy lifting and really step-up your existing backup and recovery routines.
+___
+## Additional Btrfs Commands
+Although not covered in this guide, here are some additional commands that can be useful when using the Btrfs filesystem.
 
-### Device Usage
+### Btrfs Device Usage
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs device usage /mnt/data
@@ -413,7 +438,7 @@ deep@ubuntu-vm:~$ sudo btrfs device usage /mnt/data
    Unallocated:             9.48GiB
 ```
 
-### Device Statistics
+### Btrfs Device Statistics
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs device stats /mnt/data
@@ -424,7 +449,7 @@ deep@ubuntu-vm:~$ sudo btrfs device stats /mnt/data
 [/dev/sdb].generation_errs  0
 ```
 
-### Filesystem Show
+### Btrfs Filesystem Show
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs filesystem show /mnt/data
@@ -433,7 +458,7 @@ Label: none  uuid: c660a282-d8b8-4273-a7eb-f16f648aac9b
         devid    1 size 10.00GiB used 536.00MiB path /dev/sdb
 ```
 
-### Filesystem Usage
+### Btrfs Filesystem Usage
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs filesystem usage /mnt/data
@@ -461,7 +486,7 @@ Unallocated:
    /dev/sdb        9.48GiB
 ```  
 
-### Filesystem Disk Free
+### Btrfs Filesystem Disk Free
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs filesystem df /mnt/data
@@ -471,7 +496,7 @@ Metadata, DUP: total=256.00MiB, used=128.00KiB
 GlobalReserve, single: total=3.25MiB, used=0.00B
 ```
 
-### Filesystem Disk Usage
+### Btrfs Filesystem Disk Usage
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs filesystem du /mnt/data
