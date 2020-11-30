@@ -438,7 +438,7 @@ snapshot-ro/notes:
 notes1.txt  notes2.txt  notes3.txt
 ```
 
-As before, we can use the `btrs subvolume list` and `btrs subvolume show` commands on the snapshot (subvolume) which was transmitted and is now available at `/mnt/restore/snapshot-ro`. 
+As before, we can use the `btrfs subvolume list` and `btrfs subvolume show` commands on the snapshot (subvolume) which was transmitted and is now available at `/mnt/restore/snapshot-ro`. 
 
 ```
 deep@ubuntu-vm:/mnt/restore$ sudo btrfs subvolume list /mnt/restore/snapshot-ro
