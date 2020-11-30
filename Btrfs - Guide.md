@@ -222,24 +222,24 @@ Create a snapshot of '/mnt/data/documents' in '/mnt/data/documents/snapshots'
 #### Verifying the Creation of a Snapshot (Subvolume)
 If you haven't yet noticed a pattern, by this point, you should note that some of the `btrfs` commands don't output too much fanfare when things are successfully created.  I suppose it's fodder for a good written tutorial.
 
-Let's verify the creation of the snapshot using a basic `ls` command.  The `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshots` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents` source subvolume.
+Let's verify the creation of the snapshot using a basic `ls` command.  The `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshots` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents` source subvolume.  The `-i ` parameter demonstrates that those COW capabilities are actually functioning.  We can examine the inode of each of the files within the source and snapshot subvolumes and determine that the inode values are the same for each file with the same name.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ ls -R *
+deep@ubuntu-vm:/mnt/data/documents$ ls -Ri *
 files:
-file1.txt  file2.txt  file3.txt
+258 files1.txt  259 files2.txt  260 files3.txt
 
 notes:
-note1.txt  note2.txt  note3.txt
+262 notes1.txt  263 notes2.txt  264 notes3.txt
 
 snapshots:
-files  notes
+257 files  261 notes
 
 snapshots/files:
-file1.txt  file2.txt  file3.txt
+258 files1.txt  259 files2.txt  260 files3.txt
 
 snapshots/notes:
-note1.txt  note2.txt  note3.txt
+262 notes1.txt  263 notes2.txt  264 notes3.txt
 ```
 
 We should also verify using the `btrfs` commands.  The `btrfs subvolume show` command can be used on both subvolumes (the source subvolume and the snapshot).
@@ -425,6 +425,21 @@ ___
 ## Additional Btrfs Commands
 Although not covered in this guide, here are some additional commands that can be useful when using the Btrfs filesystem.
 
+### Btrfs Quotas
+
+```
+deep@ubuntu-vm:~$ sudo btrfs quota enable /mnt/data
+```
+
+
+```
+deep@ubuntu-vm:~$ sudo btrfs qgroup show /mnt/data
+qgroupid         rfer         excl
+--------         ----         ----
+0/5          16.00KiB     16.00KiB
+0/257        16.00KiB     16.00KiB
+0/258        16.00KiB     16.00KiB
+```
 ### Btrfs Device Usage
 
 ```
