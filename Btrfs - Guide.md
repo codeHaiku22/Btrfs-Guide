@@ -400,7 +400,7 @@ snapshots-ro/snapshots:
 ```
 
 ### Creating a Read-Only Snapshot for Transmission
-Btrfs allows for the transmission of a snapshot to any other device which also contains storage using the Btrfs filesystem.  In order for this to function properly, the snapshot must be creating in read-only mode.
+Btrfs allows for the transmission of a snapshot to any other device which also contains storage using the Btrfs filesystem.  In order for this to function properly, the snapshot must be created in read-only mode.  For this example, an additional storage device at `/dev/sdc` was created, formatted with the Btrfs filesystem and mounted at `/mnt/restore`.  
 
 #### Creating the Read-Only Snapshot
 Let's go ahead and create a read-only snapshot of the subvolume `/mnt/data/documents` into the snapshot location `/mnt/data/documents/snapshots-ro`.  Since we want to make a read-only snapshot, we  must provide the `-r` parameter to the `btrfs subvolume snapshots` command.  
@@ -410,14 +410,56 @@ deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume snapshot -r /mnt/data/d
 Create a readonly snapshot of '/mnt/data/documents' in '/mnt/data/documents/snapshots-ro'
 ```
 
-### Transmitting the Snapshot
+#### Transmitting the Snapshot
 The `btrfs send` and `btrfs receive` commands can be used in conjunction to send a snapshot from a host system and receive the snapshot by a target system.  This snapshot can then be mounted and fully functional on the target system.
 
 In our example, we will send the read-only snapshot created in the previous step to a newly mounted btrfs filesystem at `/mnt/restore`.
 
 ```
 deep@ubuntu-vm:~$ sudo btrfs send /mnt/data/documents/snapshots-ro/ | sudo btrfs receive /mnt/restore/
+At subvol /mnt/data/documents/snapshot-ro
+At subvol snapshot-ro
 ```
+
+#### Verifying the Transmission of the Snapshot
+Let's verify the transmission of the snapshot using a basic `ls` command.  Once again, the `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshot-ro` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents/snapshot-ro` source snapshot (subvolume).  
+
+```
+deep@ubuntu-vm:/mnt/data/documents$ cd /mnt/restore
+
+deep@ubuntu-vm:/mnt/restore$ ls -R *
+snapshot-ro:
+files  notes
+
+snapshot-ro/files:
+files1.txt  files2.txt  files3.txt
+
+snapshot-ro/notes:
+notes1.txt  notes2.txt  notes3.txt
+```
+
+As before, we can use the `btrs subvolume list` and `btrs subvolume show` commands on the snapshot (subvolume) which was transmitted and is now available at `/mnt/restore/snapshot-ro`. 
+
+```
+deep@ubuntu-vm:/mnt/restore$ sudo btrfs subvolume list /mnt/restore/snapshot-ro
+ID 259 gen 13 top level 5 path snapshot-ro
+
+deep@ubuntu-vm:/mnt/restore$ sudo btrfs subvolume show /mnt/restore/snapshot-ro
+snapshot-ro
+        Name:                   snapshot-ro
+        UUID:                   8629615d-e138-4242-96e4-a98fc4ebcb8a
+        Parent UUID:            -
+        Received UUID:          ff7d12c9-ddca-7545-854e-fdab52907a3d
+        Creation time:          2020-11-25 21:46:12 +0000
+        Subvolume ID:           259
+        Generation:             13
+        Gen at creation:        12
+        Parent ID:              5
+        Top level ID:           5
+        Flags:                  readonly
+        Snapshot(s):
+```
+
 ___
 ## Summary
 Btrfs is a powerful and streamlined implementation within Linux which seeks to make data preservation and recovery simple and efficient.  This guide covers some of the basic aspects of Btrfs.  There is so much more that can be done with this filesystem and its variety of commands.  Add in some scripting (BASH, Python, Perl, etc.) and you have everything needed to create powerful Btrfs solutions that can accomplish some very heavy lifting and really step-up your existing backup and recovery routines.
