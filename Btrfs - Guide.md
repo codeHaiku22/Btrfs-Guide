@@ -24,7 +24,7 @@ For the purposes of this example, I have created an Ubuntu Server 20.04 virtual 
 The disk `/dev/sda` is a 15GB disk that contains the root partition.  The disk `/dev/sdb` is a 10GB disk and was added as a separate disk drive to demonstrate the implementation of Btrfs.  Think of it as an additional drive you add to your machine to save data on.
 
 ```
-deep@ubuntu-vm:~$ lsblk
+$ lsblk
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 loop0    7:0    0 67.8M  1 loop /snap/lxd/18150
 loop1    7:1    0   55M  1 loop /snap/core18/1880
@@ -49,7 +49,7 @@ Before we can do anything with Btrfs, the first step is to format `/dev/sdb` wit
 <br/>
 
 ```
-deep@ubuntu-vm:~$ sudo mkfs.btrfs -f /dev/sdb
+$ sudo mkfs.btrfs -f /dev/sdb
 btrfs-progs v5.4.1
 See http://btrfs.wiki.kernel.org for more information.
 
@@ -77,13 +77,13 @@ Since `/dev/sdb` is intended to store additional data, we can create a mount-poi
 First, let's create the mount-point.
 
 ```
-deep@ubuntu-vm:~$ sudo mkdir -p /mnt/data
+$ sudo mkdir -p /mnt/data
 ```
 
 Now that the mount-point has been created, we can mount `/dev/sdb` to the newly created mount-point at `/mnt/data`.
 
 ```
-deep@ubuntu-vm:~$ sudo mount -t btrfs /dev/sdb /mnt/data
+$ sudo mount -t btrfs /dev/sdb /mnt/data
 ```
 
 #### Verifying a Successful Mount
@@ -92,21 +92,21 @@ The outputs of both of those last commands were pretty uneventful.  Let's run so
 Let's start by listing all of the block devices and filtering for `sdb`.  The output does indeed show that `sdb` is mounted at `/mnt/data`.
 
 ```
-deep@ubuntu-vm:~$ lsblk | grep sdb
+$ lsblk | grep sdb
 sdb      8:16   0   10G  0 disk /mnt/data
 ```
 
 Now, let's try another command to list all of the mounts and filter for `sdb`.  The output of this command also shows a successful mount has occurred.  It also displays additional information about the btrfs subvolume.  Notably, that the subvolume has an id of 5 (`subvolid=5`) and that it is the parent or top-level subvolume (`subvol=/`).
 
 ```
-deep@ubuntu-vm:~$ mount -l | grep sdb
+$ mount -l | grep sdb
 /dev/sdb on /mnt/data type btrfs (rw,relatime,space_cache,subvolid=5,subvol=/)
 ```
 
 And for good measure, let's try yet another method to verify that all went well by using the `btrfs subvolume show` command on the `/mnt/data` location.  The output of this command also indicates the subvolume id of 5 (`Subvolume ID: 5`).
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs subvolume show /mnt/data
+$ sudo btrfs subvolume show /mnt/data
 /
         Name:                   <FS_TREE>
         UUID:                   a50cdf77-58cd-4762-9ad0-87a827192cbd
@@ -138,7 +138,7 @@ Subvolume Id | Parent Subvolume Id | Name | Path
 Recall that `/dev/sdb` was intended to be an additional disk which we will use to store data on.  Let's extend this example and create another subvolume on this disk which will be used for storing documents.  We can call this new subvolume `documents`.  This subvolume will appear and behave as a subdirectory once it is created.  
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs subvolume create /mnt/data/documents
+$ sudo btrfs subvolume create /mnt/data/documents
 Create subvolume '/mnt/data/documents'
 ```
 
@@ -148,7 +148,7 @@ As before, the output of that last command was also pretty uneventful.  Let's ru
 Let's once again use the `btrfs subvolume show` command on the `/mnt/data/documents` location.  The output of this command indicates the subvolume id of 257 (`Subvolume ID: 257`).
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs subvolume show /mnt/data/documents
+$ sudo btrfs subvolume show /mnt/data/documents
 documents
         Name:                   documents
         UUID:                   82224209-acdb-fc46-b2af-daeff385d841
@@ -167,7 +167,7 @@ documents
 Now is a good time to introduce another command that allows us to verify a subvolume.  The output of this command also indicates the subvolume id of 257 (`ID 257`).
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs subvolume list /mnt/data/documents
+$ sudo btrfs subvolume list /mnt/data/documents
 ID 257 gen 7 top level 5 path documents
 ```
 
@@ -177,22 +177,22 @@ In order to demonstrate snapshots, we should create some subdirectories and file
 First, let's navigate to the `/mnt/data/documents` subvolume and create the `files` and `notes` subdirectories.
 
 ```
-deep@ubuntu-vm:~$ cd /mnt/data/documents/
+$ cd /mnt/data/documents/
 
-deep@ubuntu-vm:/mnt/data/documents$ sudo mkdir files notes
+$ sudo mkdir files notes
 
-deep@ubuntu-vm:/mnt/data/documents$ ls
+$ ls
 files  notes
 ```
 
 Next, let's create some files within each of these subdirectories and verify their creation.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo touch files/file{1..3}.txt
+$ sudo touch files/file{1..3}.txt
 
-deep@ubuntu-vm:/mnt/data/documents$ sudo touch notes/note{1..3}.txt
+$ sudo touch notes/note{1..3}.txt
 
-deep@ubuntu-vm:/mnt/data/documents$ ls *
+$ ls *
 files:
 file1.txt  file2.txt  file3.txt
 
@@ -215,7 +215,7 @@ Everything is now in place to create a snapshot.  We now have: a Btrfs filesyste
 Let's create a snapshot for the subvolume `/mnt/data/documents` into the snapshot location `/mnt/data/documents/snapshots`.  If we wanted to make a read-only snapshot, we could provide the `-r` parameter to the `btrfs subvolume snapshots` command.  In this example, we will not make the snapshot read-only.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume snapshot /mnt/data/documents /mnt/data/documents/snapshots
+$ sudo btrfs subvolume snapshot /mnt/data/documents /mnt/data/documents/snapshots
 Create a snapshot of '/mnt/data/documents' in '/mnt/data/documents/snapshots'
 ```
 
@@ -225,7 +225,7 @@ If you haven't yet noticed a pattern, by this point, you should note that some o
 Let's verify the creation of the snapshot using a basic `ls` command.  The `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshots` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents` source subvolume.  The `-i ` parameter demonstrates that those COW capabilities are actually functioning.  We can examine the inode of each of the files within the source and snapshot subvolumes and determine that the inode values are the same for each file with the same name.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ ls -Ri *
+$ ls -Ri *
 files:
 258 files1.txt  259 files2.txt  260 files3.txt
 
@@ -247,7 +247,7 @@ We should also verify using the `btrfs` commands.  The `btrfs subvolume show` co
 When we run the command against the source subvolume the `Snapshot(s)` section does indeed state that there is an existance of snapshots in `documents/snapshots`.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume show /mnt/data/documents/
+$ sudo btrfs subvolume show /mnt/data/documents/
 documents
         Name:                   documents
         UUID:                   82224209-acdb-fc46-b2af-daeff385d841
@@ -267,7 +267,7 @@ documents
 When the command is run against the snapshot subvolume, the `Parent ID: 257` does indicate that this subvolume is a child of the source subvolume.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume show /mnt/data/documents/snapshots
+$ sudo btrfs subvolume show /mnt/data/documents/snapshots
 documents/snapshots
         Name:                   snapshots
         UUID:                   febf959f-7bfd-ae41-81e8-c73707ec07d6
@@ -286,11 +286,11 @@ documents/snapshots
 As a belt-and-suspenders check, let's run the `btrfs subvolume list` command against the source and snapshot subvolumes to determine the same information.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume list /mnt/data/documents
+$ sudo btrfs subvolume list /mnt/data/documents
 ID 257 gen 14 top level 5 path documents
 ID 258 gen 13 top level 257 path snapshots
 
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume list /mnt/data/documents/snapshots
+$ sudo btrfs subvolume list /mnt/data/documents/snapshots
 ID 257 gen 14 top level 5 path documents
 ID 258 gen 13 top level 257 path documents/snapshots
 ```
@@ -313,9 +313,9 @@ The `btrfs subvolume set-default` command is a more eloquent way of shifting a m
 Prior to proceeding with any type or restoration, let's destroy some data in the `/mnt/data/documents` subvolume by deleting the `files` subdirectory.  This will help prove whether or not the restoration was successful.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo rm -rf files
+$ sudo rm -rf files
 
-deep@ubuntu-vm:/mnt/data/documents$ ls *
+$ ls *
 notes:
 note1.txt  note2.txt  note3.txt
 
@@ -335,27 +335,27 @@ Subvolume Id | Parent Subvolume Id | Name | Path
 The current default subvolume is 5 and we are going to change it to 258.  
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume set-default 258 /mnt/data
+$ sudo btrfs subvolume set-default 258 /mnt/data
 ```
 
 Next, we need to unmount `/dev/sdb`.
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo umount -l /dev/sdb
+$ sudo umount -l /dev/sdb
 ```
 
 Now, let's mount `/dev/sdb` to the `/mnt/data` location.
 
 ```
-deep@ubuntu-vm:/mnt$ sudo mount /dev/sdb /mnt/data
+$ sudo mount /dev/sdb /mnt/data
 ```
 
 Finally, let's navigate to the `/mnt/data` directory and recursively list the contents to verify that the restore was successful.
 
 ```
-deep@ubuntu-vm:/mnt$ cd /mnt/data
+$ cd /mnt/data
 
-deep@ubuntu-vm:/mnt/data$ ls -R *
+$ ls -R *
 files:
 file1.txt  file2.txt  file3.txt
 
@@ -366,15 +366,15 @@ note1.txt  note2.txt  note3.txt
 To go back to the way things were prior to changing the default subvolume. The following commands can be performed,
 
 ```
-deep@ubuntu-vm:/mnt/data$ sudo btrfs subvolume set-default 5 /mnt/data
+$ sudo btrfs subvolume set-default 5 /mnt/data
 
-deep@ubuntu-vm:/mnt/data$ sudo umount -l /dev/sdb
+$ sudo umount -l /dev/sdb
 
-deep@ubuntu-vm:/mnt/data$ sudo mount /dev/sdb /mnt/data
+$ sudo mount /dev/sdb /mnt/data
 
-deep@ubuntu-vm:/mnt/data$ cd documents
+$ cd documents
 
-deep@ubuntu-vm:/mnt/data/documents$ ls -R *
+$ ls -R *
 notes:
 note1.txt  note2.txt  note3.txt
 
@@ -406,7 +406,7 @@ Btrfs allows for the transmission of a snapshot to any other device which also c
 Let's go ahead and create a read-only snapshot of the subvolume `/mnt/data/documents` into the snapshot location `/mnt/data/documents/snapshots-ro`.  Since we want to make a read-only snapshot, we  must provide the `-r` parameter to the `btrfs subvolume snapshots` command.  
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ sudo btrfs subvolume snapshot -r /mnt/data/documents /mnt/data/documents/snapshots-ro
+$ sudo btrfs subvolume snapshot -r /mnt/data/documents /mnt/data/documents/snapshots-ro
 Create a readonly snapshot of '/mnt/data/documents' in '/mnt/data/documents/snapshots-ro'
 ```
 
@@ -416,7 +416,7 @@ The `btrfs send` and `btrfs receive` commands can be used in conjunction to send
 In our example, we will send the read-only snapshot created in the previous step to a newly mounted btrfs filesystem at `/mnt/restore`.
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs send /mnt/data/documents/snapshots-ro/ | sudo btrfs receive /mnt/restore/
+$ sudo btrfs send /mnt/data/documents/snapshots-ro/ | sudo btrfs receive /mnt/restore/
 At subvol /mnt/data/documents/snapshot-ro
 At subvol snapshot-ro
 ```
@@ -425,9 +425,9 @@ At subvol snapshot-ro
 Let's verify the transmission of the snapshot using a basic `ls` command.  Once again, the `-R` parameter allows us to recursively list the contents of each subdirectory.  The output of this command does indeed show that a `snapshot-ro` subdirectory (subvolume) has been created which contains all of the data that was in the `/mnt/data/documents/snapshot-ro` source snapshot (subvolume).  
 
 ```
-deep@ubuntu-vm:/mnt/data/documents$ cd /mnt/restore
+$ cd /mnt/restore
 
-deep@ubuntu-vm:/mnt/restore$ ls -R *
+$ ls -R *
 snapshot-ro:
 files  notes
 
@@ -441,10 +441,10 @@ notes1.txt  notes2.txt  notes3.txt
 As before, we can use the `btrfs subvolume list` and `btrfs subvolume show` commands on the snapshot (subvolume) which was transmitted and is now available at `/mnt/restore/snapshot-ro`. 
 
 ```
-deep@ubuntu-vm:/mnt/restore$ sudo btrfs subvolume list /mnt/restore/snapshot-ro
+$ sudo btrfs subvolume list /mnt/restore/snapshot-ro
 ID 259 gen 13 top level 5 path snapshot-ro
 
-deep@ubuntu-vm:/mnt/restore$ sudo btrfs subvolume show /mnt/restore/snapshot-ro
+$ sudo btrfs subvolume show /mnt/restore/snapshot-ro
 snapshot-ro
         Name:                   snapshot-ro
         UUID:                   8629615d-e138-4242-96e4-a98fc4ebcb8a
@@ -470,12 +470,12 @@ Although not covered in this guide, here are some additional commands that can b
 ### Btrfs Quotas
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs quota enable /mnt/data
+$ sudo btrfs quota enable /mnt/data
 ```
 
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs qgroup show /mnt/data
+$ sudo btrfs qgroup show /mnt/data
 qgroupid         rfer         excl
 --------         ----         ----
 0/5          16.00KiB     16.00KiB
@@ -485,7 +485,7 @@ qgroupid         rfer         excl
 ### Btrfs Device Usage
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs device usage /mnt/data
+$ sudo btrfs device usage /mnt/data
 /dev/sdb, ID: 1
    Device size:            10.00GiB
    Device slack:              0.00B
@@ -498,7 +498,7 @@ deep@ubuntu-vm:~$ sudo btrfs device usage /mnt/data
 ### Btrfs Device Statistics
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs device stats /mnt/data
+$ sudo btrfs device stats /mnt/data
 [/dev/sdb].write_io_errs    0
 [/dev/sdb].read_io_errs     0
 [/dev/sdb].flush_io_errs    0
@@ -509,7 +509,7 @@ deep@ubuntu-vm:~$ sudo btrfs device stats /mnt/data
 ### Btrfs Filesystem Show
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs filesystem show /mnt/data
+$ sudo btrfs filesystem show /mnt/data
 Label: none  uuid: c660a282-d8b8-4273-a7eb-f16f648aac9b
         Total devices 1 FS bytes used 208.00KiB
         devid    1 size 10.00GiB used 536.00MiB path /dev/sdb
@@ -518,7 +518,7 @@ Label: none  uuid: c660a282-d8b8-4273-a7eb-f16f648aac9b
 ### Btrfs Filesystem Usage
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs filesystem usage /mnt/data
+$ sudo btrfs filesystem usage /mnt/data
 Overall:
     Device size:                  10.00GiB
     Device allocated:            536.00MiB
@@ -546,7 +546,7 @@ Unallocated:
 ### Btrfs Filesystem Disk Free
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs filesystem df /mnt/data
+$ sudo btrfs filesystem df /mnt/data
 Data, single: total=8.00MiB, used=64.00KiB
 System, DUP: total=8.00MiB, used=16.00KiB
 Metadata, DUP: total=256.00MiB, used=128.00KiB
@@ -556,7 +556,7 @@ GlobalReserve, single: total=3.25MiB, used=0.00B
 ### Btrfs Filesystem Disk Usage
 
 ```
-deep@ubuntu-vm:~$ sudo btrfs filesystem du /mnt/data
+$ sudo btrfs filesystem du /mnt/data
      Total   Exclusive  Set shared  Filename
      0.00B       0.00B           -  /mnt/data/documents
      0.00B       0.00B       0.00B  /mnt/data
