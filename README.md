@@ -386,17 +386,6 @@ file1.txt  file2.txt  file3.txt
 
 snapshots/notes:
 note1.txt  note2.txt  note3.txt
-
-snapshots-ro:
-files  notes  snapshots
-
-snapshots-ro/files:
-file1.txt  file2.txt  file3.txt
-
-snapshots-ro/notes:
-note1.txt  note2.txt  note3.txt
-
-snapshots-ro/snapshots:
 ```
 
 ### Creating a Read-Only Snapshot for Transmission
