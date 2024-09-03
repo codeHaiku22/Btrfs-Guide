@@ -1,6 +1,6 @@
 # The Simple Guide to Btrfs
-Deep Grewal
-Created: November 25, 2020
+Deep Grewal<br>
+Created: November 25, 2020<br>
 Updated: September 3, 2024
 
 ___
