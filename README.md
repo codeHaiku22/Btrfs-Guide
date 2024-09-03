@@ -1,5 +1,7 @@
 # The Simple Guide to Btrfs
-Deep Grewal - November 25, 2020
+Deep Grewal
+Created: November 25, 2020
+Updated: September 3, 2024
 
 ___
 ## What is Btrfs?
